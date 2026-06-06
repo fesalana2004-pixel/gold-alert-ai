@@ -1,0 +1,14 @@
+export default {
+    language: { name: 'Français', nativeName: 'Français' },
+    app: { name: 'Gold Alert AI | Signaux d\'Or Intelligents', shortName: 'Gold Alert', description: 'Application intelligente pour le suivi de l\'or et les signaux de trading instantanés' },
+    nav: { home: 'Accueil', news: 'Actualités', alerts: 'Alertes', settings: 'Paramètres' },
+    home: { livePrice: 'Prix de l\'Or en Direct', xauusd: 'XAU/USD', live: 'EN DIRECT', hour: '1 Heure', hours24: '24 Heures', week: '1 Semaine', month: '1 Mois', latestSignal: 'Dernier Signal', signalStrength: 'Force du Signal', marketDirection: 'Direction du Marché', noSignal: 'Aucun signal', confidence: 'Confiance' },
+    signal: { buyGold: '🟢 Acheter l\'Or', sellGold: '🔴 Vendre l\'Or', neutral: '⚪ Neutre', buy: 'Acheter', sell: 'Vendre', strong: 'Fort', medium: 'Moyen', weak: 'Faible', reason: 'Raison', result: 'Résultat', success: 'Succès', failed: 'Échec', pending: 'En attente' },
+    news: { title: 'Actualités Économiques', filterAll: 'Tout', filterBuy: 'Acheter 🟢', filterSell: 'Vendre 🔴', filterNeutral: 'Neutre ⚪', impact: 'Impact', generateSignal: 'Générer un Signal', signalGenerated: 'Signal Généré ✓', noNews: 'Pas d\'actualités', timeAgo: { minutes: 'Il y a {minutes} min', hours: 'Il y a {hours} heures', days: 'Il y a {days} jours' } },
+    alerts: { title: 'Signaux Totaux', signalHistory: 'Historique des Signaux', noAlerts: 'Aucune alerte', type: 'Type de Signal', time: 'Heure', status: 'Statut' },
+    settings: { title: 'Paramètres', notifications: 'Notifications', enableNotifications: 'Activer les Notifications', minConfidence: 'Force Minimale du Signal', newsFilter: 'Filtre d\'Actualités', language: 'Langue', selectLanguage: 'Choisir la Langue', categories: { interestRates: 'Taux d\'Intérêt US', cpi: 'Inflation IPC', nfp: 'Emploi NFP', centralBanks: 'Décisions des Banques Centrales', geopolitical: 'Crises Géopolitiques' }, about: 'À Propos', version: 'Version', contact: 'Contact', privacy: 'Confidentialité', terms: 'Conditions' },
+    market: { bullish: '📈 Haussier', bearish: '📉 Baissier', sideways: '📊 Latéral' },
+    notifications: { newSignal: 'Nouveau Signal', goldBuyAlert: 'Signal d\'Achat d\'Or', goldSellAlert: 'Signal de Vente d\'Or', confidence: 'Confiance: {confidence}%', tapToView: 'Appuyez pour voir' },
+    errors: { loading: 'Erreur de chargement', retry: 'Réessayer', noConnection: 'Pas de connexion', offline: 'Vous êtes hors ligne' },
+    actions: { save: 'Enregistrer', cancel: 'Annuler', confirm: 'Confirmer', delete: 'Supprimer', share: 'Partager', copy: 'Copier', refresh: 'Actualiser' }
+};

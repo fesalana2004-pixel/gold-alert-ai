@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1a1a2e">
+    <meta name="description" content="تطبيق ذكي لمتابعة الذهب وإرسال إشارات تداول فورية">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Gold Alert AI">
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192.png">
+    <title>Gold Alert AI | إشارات الذهب الذكية</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* شاشة التحميل */
+        .splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #0a0a1a, #1a1a2e);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+        .splash-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .splash-logo {
+            font-size: 80px;
+            animation: pulse 2s infinite;
+        }
+        .splash-title {
+            color: #d4a843;
+            font-size: 28px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        .splash-subtitle {
+            color: #b0b0b0;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        .splash-loader {
+            width: 60px;
+            height: 4px;
+            background: #2a2a4a;
+            border-radius: 2px;
+            margin-top: 30px;
+            overflow: hidden;
+        }
+        .splash-loader-bar {
+            height: 100%;
+            background: #d4a843;
+            border-radius: 2px;
+            animation: loading 1.5s infinite;
+        }
+        @keyframes loading {
+            0% { width: 0; }
+            50% { width: 100%; }
+            100% { width: 0; margin-left: 100%; }
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+    </style>
+</head>
+<body>
+    <!-- شاشة التحميل -->
+    <div class="splash-screen" id="splash-screen">
+        <div class="splash-logo">🥇</div>
+        <div class="splash-title">Gold Alert AI</div>
+        <div class="splash-subtitle">إشارات الذهب الذكية</div>
+        <div class="splash-loader">
+            <div class="splash-loader-bar"></div>
+        </div>
+    </div>
+
+    <!-- شريط التنقل السفلي -->
+    <nav class="bottom-nav">
+        <a href="#home" class="nav-item active" data-page="home">
+            <i class="fas fa-home"></i>
+            <span data-i18n="nav.home">الرئيسية</span>
+        </a>
+        <a href="#news" class="nav-item" data-page="news">
+            <i class="fas fa-newspaper"></i>
+            <span data-i18n="nav.news">الأخبار</span>
+        </a>
+        <a href="#alerts" class="nav-item" data-page="alerts">
+            <i class="fas fa-bell"></i>
+            <span data-i18n="nav.alerts">التنبيهات</span>
+        </a>
+        <a href="#settings" class="nav-item" data-page="settings">
+            <i class="fas fa-cog"></i>
+            <span data-i18n="nav.settings">الإعدادات</span>
+        </a>
+    </nav>
+
+    <!-- المحتوى الرئيسي -->
+    <main id="app-content">
+        <!-- الصفحة الرئيسية -->
+        <div id="home" class="page active">
+            <!-- بطاقة سعر الذهب -->
+            <div class="gold-price-card">
+                <div class="price-header">
+                    <div>
+                        <h2 data-i18n="home.xauusd">XAU/USD</h2>
+                        <span style="font-size: 12px; color: #b0b0b0;" data-i18n="home.livePrice">سعر الذهب لحظياً</span>
+                    </div>
+                    <span class="live-badge" data-i18n="home.live">مباشر</span>
+                </div>
+                <div class="current-price" id="current-price">--</div>
+                <div class="price-change" id="price-change">--</div>
+                <div class="chart-container" id="price-chart">
+                    <canvas id="goldChart"></canvas>
+                </div>
+                <div class="chart-periods">
+                    <button class="period-btn active" data-period="1h" data-i18n="home.hour">ساعة</button>
+                    <button class="period-btn" data-period="24h" data-i18n="home.hours24">24 ساعة</button>
+                    <button class="period-btn" data-period="1w" data-i18n="home.week">أسبوع</button>
+                    <button class="period-btn" data-period="1m" data-i18n="home.month">شهر</button>
+                </div>
+            </div>
+
+            <!-- بطاقة آخر إشارة -->
+            <div class="signal-card" id="latest-signal">
+                <div class="signal-header">
+                    <h3 data-i18n="home.latestSignal">آخر إشارة</h3>
+                    <span class="signal-time" id="signal-time">--</span>
+                </div>
+                <div class="signal-type neutral" id="signal-type" data-i18n="home.noSignal">لا توجد إشارات بعد</div>
+                <div class="signal-confidence">
+                    <span data-i18n="home.signalStrength">قوة الإشارة:</span>
+                    <div class="confidence-bar">
+                        <div class="confidence-fill weak" id="confidence-fill" style="width: 0%"></div>
+                    </div>
+                    <span id="confidence-value">--%</span>
+                </div>
+                <div class="signal-reason" id="signal-reason">--</div>
+            </div>
+
+            <!-- اتجاه السوق -->
+            <div class="market-direction">
+                <h3 data-i18n="home.marketDirection">اتجاه السوق</h3>
+                <div class="direction-indicator sideways" id="market-direction" data-i18n="market.sideways">📊 عرضي</div>
+            </div>
+        </div>
+
+        <!-- صفحة الأخبار -->
+        <div id="news" class="page">
+            <div class="page-header">
+                <h2 data-i18n="news.title">الأخبار الاقتصادية</h2>
+                <button class="refresh-btn" id="refresh-news" title="تحديث">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
+            <div class="news-filter">
+                <button class="filter-btn active" data-filter="all" data-i18n="news.filterAll">الكل</button>
+                <button class="filter-btn" data-filter="buy" data-i18n="news.filterBuy">شراء 🟢</button>
+                <button class="filter-btn" data-filter="sell" data-i18n="news.filterSell">بيع 🔴</button>
+                <button class="filter-btn" data-filter="neutral" data-i18n="news.filterNeutral">محايد ⚪</button>
+            </div>
+            <div class="news-list" id="news-list">
+                <div class="empty-state">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>جاري تحميل الأخبار...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- صفحة التنبيهات -->
+        <div id="alerts" class="page">
+            <div class="page-header">
+                <h2 data-i18n="alerts.signalHistory">سجل الإشارات</h2>
+                <button class="refresh-btn" id="clear-alerts" title="مسح الكل">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            </div>
+            <div class="alerts-summary" id="alerts-summary">
+                <div class="summary-item">
+                    <span class="summary-number" id="total-signals">0</span>
+                    <span data-i18n="alerts.title">إجمالي الإشارات</span>
+                </div>
+                <div class="summary-item success">
+                    <span class="summary-number" id="success-signals">0</span>
+                    <span data-i18n="signal.success">ناجحة</span>
+                </div>
+                <div class="summary-item failed">
+                    <span class="summary-number" id="failed-signals">0</span>
+                    <span data-i18n="signal.failed">فاشلة</span>
+                </div>
+            </div>
+            <div class="alerts-list" id="alerts-list">
+                <div class="empty-state">
+                    <i class="fas fa-bell-slash"></i>
+                    <p data-i18n="alerts.noAlerts">لا توجد تنبيهات سابقة</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- صفحة الإعدادات -->
+        <div id="settings" class="page">
+            <div class="settings-group">
+                <h3 data-i18n="settings.language">🌍 اللغة</h3>
+                <div class="setting-item">
+                    <span data-i18n="settings.selectLanguage">اختر اللغة</span>
+                    <select id="language-select" class="language-select">
+                        <option value="ar">🇸🇦 العربية</option>
+                        <option value="en">🇺🇸 English</option>
+                        <option value="es">🇪🇸 Español</option>
+                        <option value="fr">🇫🇷 Français</option>
+                        <option value="de">🇩🇪 Deutsch</option>
+                        <option value="tr">🇹🇷 Türkçe</option>
+                        <option value="hi">🇮🇳 हिन्दी</option>
+                        <option value="zh">🇨🇳 中文</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="settings-group">
+                <h3 data-i18n="settings.notifications">🔔 الإشعارات</h3>
+                <div class="setting-item">
+                    <span data-i18n="settings.enableNotifications">تفعيل الإشعارات</span>
+                    <label class="switch">
+                        <input type="checkbox" id="notifications-toggle" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <span data-i18n="settings.minConfidence">الحد الأدنى لقوة الإشارة</span>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <input type="range" id="min-confidence" min="0" max="100" value="60">
+                        <span id="confidence-display" style="min-width: 40px;">60%</span>
+                    </div>
+                </div>
+                <div class="setting-item">
+                    <span>وضع الاهتزاز</span>
+                    <label class="switch">
+                        <input type="checkbox" id="vibration-toggle" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <span>صوت التنبيه</span>
+                    <label class="switch">
+                        <input type="checkbox" id="sound-toggle" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="settings-group">
+                <h3 data-i18n="settings.newsFilter">📰 فلتر الأخبار المهمة</h3>
+                <div class="setting-item">
+                    <span data-i18n="settings.categories.interestRates">أسعار الفائدة الأمريكية</span>
+                    <label class="switch">
+                        <input type="checkbox" class="news-filter-checkbox" data-filter="interest-rates" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <span data-i18n="settings.categories.cpi">التضخم CPI</span>
+                    <label class="switch">
+                        <input type="checkbox" class="news-filter-checkbox" data-filter="cpi" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <span data-i18n="settings.categories.nfp">الوظائف NFP</span>
+                    <label class="switch">
+                        <input type="checkbox" class="news-filter-checkbox" data-filter="nfp" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <span data-i18n="settings.categories.centralBanks">قرارات البنوك المركزية</span>
+                    <label class="switch">
+                        <input type="checkbox" class="news-filter-checkbox" data-filter="central-banks" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <span data-i18n="settings.categories.geopolitical">الأزمات الجيوسياسية</span>
+                    <label class="switch">
+                        <input type="checkbox" class="news-filter-checkbox" data-filter="geopolitical" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="settings-group">
+                <h3 data-i18n="settings.about">ℹ️ حول التطبيق</h3>
+                <div class="setting-item">
+                    <span data-i18n="settings.version">الإصدار</span>
+                    <span style="color: var(--gold);">1.0.0</span>
+                </div>
+                <div class="setting-item">
+                    <span data-i18n="settings.contact">اتصل بنا</span>
+                    <span style="color: var(--text-secondary);">support@goldalert.ai</span>
+                </div>
+                <div class="setting-item">
+                    <span data-i18n="settings.privacy">سياسة الخصوصية</span>
+                    <i class="fas fa-chevron-right" style="color: var(--text-secondary);"></i>
+                </div>
+                <div class="setting-item">
+                    <span data-i18n="settings.terms">شروط الاستخدام</span>
+                    <i class="fas fa-chevron-right" style="color: var(--text-secondary);"></i>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- رسالة التأكيد -->
+    <div class="toast" id="toast"></div>
+
+    <!-- تحميل الملفات -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script type="module">
+        // استيراد نظام الترجمة أولاً
+        import I18n from './assets/js/i18n.js';
+        
+        // تهيئة الترجمة
+        window.i18n = new I18n();
+        await window.i18n.init();
+        
+        // تحميل باقي الملفات
+        function loadScript(src) {
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = src;
+                script.onload = resolve;
+                script.onerror = reject;
+                document.body.appendChild(script);
+            });
+        }
+        
+        try {
+            await loadScript('./assets/js/api.js');
+            await loadScript('./assets/js/notifications.js');
+            await loadScript('./assets/js/app.js');
+            
+            // إخفاء شاشة التحميل
+            setTimeout(() => {
+                document.getElementById('splash-screen').classList.add('hidden');
+            }, 1500);
+        } catch (error) {
+            console.error('Error loading scripts:', error);
+            document.getElementById('splash-screen').innerHTML = `
+                <div style="text-align: center; color: white;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 60px; color: #ff1744;"></i>
+                    <p style="margin-top: 20px;">حدث خطأ في تحميل التطبيق</p>
+                    <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 30px; background: #d4a843; border: none; border-radius: 20px; cursor: pointer;">إعادة المحاولة</button>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
