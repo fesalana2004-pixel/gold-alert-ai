@@ -13,7 +13,7 @@
 
 ## النشر
 التطبيق منشور على GitHub Pages:
-https://[username].github.io/gold-alert-ai/
+https://[fesalana2004].github.io/gold-alert-ai/
 
 ## التثبيت
 1. افتح الرابط في متصفح Chrome
